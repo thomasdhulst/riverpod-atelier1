@@ -1,10 +1,18 @@
+import 'package:atelier1/logic/city_provider.dart';
+import 'package:atelier1/views/widgets/dio_error_widget.dart';
+import 'package:atelier1/views/widgets/found_city_card.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class CityFinderScreen extends StatelessWidget {
+class CityFinderScreen extends HookConsumerWidget {
   const CityFinderScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final textController = useTextEditingController();
+    final city = ref.watch(cityProvider(textController.text));
     return Scaffold(
       appBar: AppBar(title: Text('City Finder')),
       resizeToAvoidBottomInset: false,
@@ -13,6 +21,7 @@ class CityFinderScreen extends StatelessWidget {
         child: Column(
           children: [
             TextField(
+              controller: textController,
               decoration: InputDecoration(
                 labelText: 'Enter Postal Code',
                 border: OutlineInputBorder(),
@@ -23,7 +32,7 @@ class CityFinderScreen extends StatelessWidget {
             SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () {
-                // TODO: Put your logic here
+                ref.invalidate(cityProvider);
               },
               icon: Icon(Icons.search),
               label: Text('Find City'),
@@ -33,7 +42,15 @@ class CityFinderScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 16),
-            // TODO: Add FoundCityCard here or ErrorWidget
+            city.when(
+              data: (city) => FoundCityCard(city: city),
+              loading: () => CircularProgressIndicator(),
+              error:
+                  (error, stackTrace) =>
+                      error is DioException
+                          ? DioErrorWidget(error: error)
+                          : Text('An error occurred: $error'),
+            ),
           ],
         ),
       ),

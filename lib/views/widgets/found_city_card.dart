@@ -1,4 +1,5 @@
 import 'package:atelier1/models/city.dart';
+import 'package:atelier1/views/widgets/place_card.dart';
 import 'package:flutter/material.dart';
 
 class FoundCityCard extends StatelessWidget {
@@ -30,17 +31,7 @@ class FoundCityCard extends StatelessWidget {
               spacing: 8.0,
               runSpacing: 4.0,
               children:
-                  city.places
-                      .map(
-                        (place) => Card(
-                          elevation: 2,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(place.placeName),
-                          ),
-                        ),
-                      )
-                      .toList(),
+                  city.places.map((place) => PlaceCard(place: place)).toList(),
             ),
           ],
         ),
