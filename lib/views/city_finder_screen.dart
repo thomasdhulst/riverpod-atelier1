@@ -11,6 +11,17 @@ class CityFinderScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textController = useTextEditingController();
+
+    ref.listen(cityProvider(textController.text), (prev, next) {
+      if (textController.text.isEmpty) return;
+      if (prev?.isLoading ?? false) {
+        if (next.hasError) {
+          showErrorDialog(context);
+        } else if (next.hasValue) {
+          navigateToDetail(context, next.value!.places.first);
+        }
+      }
+    });
     return Scaffold(
       appBar: AppBar(title: Text('City Finder')),
       resizeToAvoidBottomInset: false,
