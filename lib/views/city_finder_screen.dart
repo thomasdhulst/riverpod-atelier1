@@ -12,16 +12,34 @@ class CityFinderScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textController = useTextEditingController();
 
-    ref.listen(cityProvider(textController.text), (prev, next) {
-      if (textController.text.isEmpty) return;
-      if (prev?.isLoading ?? false) {
-        if (next.hasError) {
+    // ref.listen(cityNotifierProvider, (prev, next) {
+    //   if (prev?.isLoading ?? false) {
+    //     if (next.hasError) {
+    //       showErrorDialog(context);
+    //     } else if (next.hasValue) {
+    //       navigateToDetail(context, next.value!.places.first);
+    //     }
+    //   }
+    // });
+
+    ref
+      ..listen(cityNotifierProvider.select((state) => state.error), (
+        prev,
+        next,
+      ) {
+        if (next != null) {
           showErrorDialog(context);
-        } else if (next.hasValue) {
-          navigateToDetail(context, next.value!.places.first);
         }
-      }
-    });
+      })
+      ..listen(cityNotifierProvider.select((state) => state.value), (
+        prev,
+        next,
+      ) {
+        if (next != null) {
+          navigateToDetail(context, next.places.first);
+        }
+      });
+
     return Scaffold(
       appBar: AppBar(title: Text('City Finder')),
       resizeToAvoidBottomInset: false,
@@ -41,7 +59,9 @@ class CityFinderScreen extends HookConsumerWidget {
             SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: () {
-                ref.invalidate(cityProvider);
+                ref
+                    .read(cityNotifierProvider.notifier)
+                    .fetchCity(textController.text);
               },
               icon: Icon(Icons.search),
               label: Text('Find City'),
